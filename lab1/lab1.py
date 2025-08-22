@@ -6,9 +6,9 @@ def unitStep(x):
 
 class Perceptron:
 
-    def __init__(self, learningRate=0.2, n=100):
+    def __init__(self, learningRate=0.2, epochs=100):
         self.lr = learningRate
-        self.n = n
+        self.epochs = n
         self.activation = unitStep
         self.weights = None
         self.bias = None
@@ -21,7 +21,7 @@ class Perceptron:
 
         t_ = np.where(t>0, 1, 0)
 
-        for _ in range(self.n):
+        for _ in range(self.epochs):
             for i, xi in enumerate(X):
                 linOut = np.dot(xi, self.weights)+self.bias
                 tPred = self.activation(linOut)
@@ -43,6 +43,16 @@ if __name__ == "__main__":
         def accuracy(tTrue, tPred):
              return (np.sum(tPred==tTrue)/len(tTrue))
         
-        
-        
+        def generateInput():
+             n = 100
+             
+             mA = np.array([1.0, 0.5])
+             sigmaA = 0.5
+             classA = np.random.randn(2, n) *sigmaA +mA[:, np.newaxis]
+             
+             mB = np.array([-1.0, -0.0])
+             sigmaB = 7
+             classB = np.random.randn(2, n) *sigmaB +mB[:, np.newaxis]
+
+             return [classA, classB]
         
