@@ -1,4 +1,19 @@
 import numpy as np
+import os
+"""
+Needed for headless solutions. 
+Remove when on a proper computer and not this shitty piece of shit computer garbage OS shitty fuckery
+ 
+"""
+#import matplotlib
+#matplotlib.use('TkAgg')
+
+def isWSL():
+     if os.path.exists('/run/WSL'):
+          print("WSL Found")
+          import matplotlib
+          matplotlib.use('TkAgg')
+     
 
 def unitStep(x):
     return np.where(x > 0, 1, -1)
@@ -13,6 +28,7 @@ class Perceptron:
         self.weights = None
         self.bias = None
         self.errorHistory = []
+        self.finalEpoch = None
 
     def fit(self, X, t):
         nSamples, nFeatures = X.shape
@@ -37,15 +53,12 @@ class Perceptron:
                     errors += 1
             self.errorHistory.append(errors)
             if errors == 0:
+                 self.finalEpoch=epoch
                  break
             self.plotBoundry(X, t, epoch)
+        self.plotBoundry(X, t, epoch)
 
-    def predict(self, X):
-        linOut = X @ self.weights + self.bias
-        tPred = self.activation(linOut)
-        return tPred
-    
-    def plotBoundry(self, X, t, epoch):
+    def plotBoundry(self, X, t, epoch, stopGraph = False):
          plt.scatter(X[t >= 0.5, 0], X[t >= 0.5, 1], c='r', marker='x', label='Class A')
          plt.scatter(X[t < 0.5, 0], X[t < 0.5, 1], c='b', marker='o', label='Class B')
 
@@ -54,22 +67,42 @@ class Perceptron:
          y = -(self.weights[0]*x+self.bias)/self.weights[1]
 
          plt.plot(x, y, color='black')
-         plt.title('Decision Boundry - Epoch %d' %(epoch+1))
+         plt.title('Decision Boundry - Epoch %d' %(epoch))
 
          plt.legend()
          plt.grid()
-         plt.show(block=False)
+         plt.show(block=stopGraph)
          plt.pause(0.2)
          plt.clf()
     
-    def plotTraining(self, epoch):
+    def plotTraining(self):
          plt.plot(range(len(self.errorHistory)), self.errorHistory)
          plt.title('Learning Curve')
          plt.grid()
          plt.show()
+
+    def plotAll(self, X, t):
+         ax1 = plt.subplot(1,2,1)
+         ax2 = plt.subplot(1,2,2)
+
+         ax1.plot(range(len(self.errorHistory)), self.errorHistory)
+         ax1.set_title("Learning Curve")
+         ax1.grid(True)
+
+         ax2.scatter(X[t >= 0.5, 0], X[t >= 0.5, 1], c='r', marker='x', label='Class A')
+         ax2.scatter(X[t < 0.5, 0], X[t < 0.5, 1], c='b', marker='o', label='Class B')
+         x = np.linspace(np.min(X[:,0]), np.max(X[:,0]), 100)
+         y = -(self.weights[0]*x+self.bias)/self.weights[1]
+         ax2.plot(x, y, color='black')
+         ax2.set_title('Decision Boundry - Epoch %d' %(self.finalEpoch))
+         ax2.grid(True)
+
+         plt.tight_layout()
+         plt.show()
+
     
 if __name__ == "__main__":
-
+        isWSL()
         import matplotlib.pyplot as plt
         
         def generateInput():
@@ -104,10 +137,11 @@ if __name__ == "__main__":
         p = Perceptron(learningRate=0.1, epochs=100)
         p.fit(X, t)
 
-        plotData(classA, classB)
-        p.plotTraining()
-    
+        #p.plotBoundry(X, t, p.finalEpoch, True)
 
+        #plotData(classA, classB)
+        #p.plotTraining()
+        p.plotAll(X, t)
 
 
 
